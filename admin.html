@@ -289,11 +289,17 @@
 
         // Salvar configurações
         document.getElementById('adminSettingsForm').addEventListener('submit', function (e) {
-            e.preventDefault();
+            e.preventDefault(); // Impede o envio padrão do formulário
 
-            const companyName = document.getElementById('companyName').value;
-            const professionalsInput = document.getElementById('professionals').value;
-            const servicesInput = document.getElementById('services').value;
+            const companyName = document.getElementById('companyName').value.trim();
+            const professionalsInput = document.getElementById('professionals').value.trim();
+            const servicesInput = document.getElementById('services').value.trim();
+
+            // Validar campos
+            if (!companyName || !professionalsInput || !servicesInput) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
 
             // Salvar horários selecionados
             const selectedHours = Array.from(hoursContainer.children)
