@@ -1,0 +1,36 @@
+// data.js
+
+// Inicializa os dados no localStorage
+let appData = {
+    companyName: '',
+    logoUrl: '',
+    professionals: [],
+    professionalImages: [],
+    services: [],
+    serviceImages: [],
+    hours: [],
+    appointments: [],
+    users: [
+        { username: 'admin', password: 'admin123' } // Usuário padrão
+    ]
+};
+
+// Carrega os dados do localStorage
+function loadAppData() {
+    const savedData = localStorage.getItem('appData');
+    if (savedData) {
+        Object.assign(appData, JSON.parse(savedData));
+    } else {
+        saveAppData(); // Salva os dados iniciais no localStorage
+    }
+}
+
+// Salva os dados no localStorage
+function saveAppData() {
+    localStorage.setItem('appData', JSON.stringify(appData));
+}
+
+// Exporta as funções e os dados para uso nos outros arquivos
+window.loadAppData = loadAppData;
+window.saveAppData = saveAppData;
+window.appData = appData;

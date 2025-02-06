@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin</title>
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <script src="data.js" defer></script>
+    <style>
+        /* Estilos omitidos para brevidade */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Painel Admin</h1>
+
+        <!-- Configurações -->
+        <form id="adminSettingsForm">
+            <label for="companyName">Nome da Empresa:</label>
+            <input type="text" id="companyName" placeholder="Ex: Barbearia XYZ">
+
+            <label for="logo">Logo ou Foto:</label>
+            <input type="file" id="logo" accept="image/*">
+            <div class="image-preview" id="logoPreview"></div>
+
+            <label for="professionals">Profissionais Disponíveis (separados por vírgula):</label>
+            <input type="text" id="professionals" placeholder="Ex: João, Maria, José">
+
+            <label for="professionalImages">Imagens dos Profissionais (upload):</label>
+            <input type="file" id="professionalImages" accept="image/*" multiple>
+            <div class="image-preview" id="professionalImagesPreview"></div>
+
+            <label for="services">Serviços Disponíveis (separados por vírgula):</label>
+            <input type="text" id="services" placeholder="Ex: Corte, Barba, Manicure">
+
+            <label for="serviceImages">Imagens dos Serviços (upload):</label>
+            <input type="file" id="serviceImages" accept="image/*" multiple>
+            <div class="image-preview" id="serviceImagesPreview"></div>
+
+            <label>Horários de Atendimento:</label>
+            <div class="hours-container" id="hoursContainer">
+                <!-- Horários serão gerados dinamicamente -->
+            </div>
+
+            <button type="submit">Salvar Configurações</button>
+        </form>
+
+        <!-- Agendamentos do Dia -->
+        <h2>Agendamentos de Hoje</h2>
+        <table id="appointmentsTable">
+            <thead>
+                <tr>
+                    <th>Cliente</th>
+                    <th>Profissional</th>
+                    <th>Serviço</th>
+                    <th>Data</th>
+                    <th>Horário</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dados serão inseridos dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Gerar horários de atendimento (7:00 às 22:00 com intervalos de 30 minutos)
+        const hoursContainer = document.getElementById('hoursContainer');
+        const availableHours = [];
+        for (let hour = 7; hour < 22; hour++) {
+            for (let minute = 0; minute < 60; minute += 30) {
+                const time = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+                availableHours.push(time);
+
+                const button = document.createElement('button');
+                button.textContent = time;
+                button.addEventListener('click', function () {
+                    button.classList.toggle('selected');
+                });
+                hoursContainer.appendChild(button);
+            }
+        }
+
+        // Função para carregar imagens e exibir previews
+        function handleImageUpload(inputElement, previewContainer) {
+            const files = inputElement.files;
+            previewContainer.innerHTML = ''; // Limpar previews anteriores
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.alt = 'Preview';
+                    img.style.maxWidth = '100px';
+                    img.style.height = '100px';
+                    img.style.borderRadius = '50%'; // Formato circular
+                    img.style.objectFit = 'cover';
+                    img.style.margin = '5px';
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Lidar com upload de logo
+        document.getElementById('logo').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    appData.logoUrl = event.target.result;
+                    document.getElementById('logoPreview').innerHTML = `<img src="${appData.logoUrl}" alt="Logo" style="max-width: 100px; height: 100px; border-radius: 50%;">`;
+                    saveAppData();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Lidar com upload de imagens de profissionais
+        document.getElementById('professionalImages').addEventListener('change', function (e) {
+            handleImageUpload(e.target, document.getElementById('professionalImagesPreview'));
+        });
+
+        // Lidar com upload de imagens de serviços
+        document.getElementById('serviceImages').addEventListener('change', function (e) {
+            handleImageUpload(e.target, document.getElementById('serviceImagesPreview'));
+        });
+
+        // Carregar dados salvos ao abrir a página
+        window.addEventListener('load', function () {
+            loadAppData();
+
+            // Preencher campos com dados salvos
+            if (appData.logoUrl) {
+                document.getElementById('logoPreview').innerHTML = `<img src="${appData.logoUrl}" alt="Logo" style="max-width: 100px; height: 100px; border-radius: 50%;">`;
+            }
+            document.getElementById('companyName').value = appData.companyName || '';
+            document.getElementById('professionals').value = appData.professionals.join(', ');
+            document.getElementById('services').value = appData.services.join(', ');
+
+            // Exibir imagens dos profissionais
+            if (appData.professionalImages) {
+                appData.professionalImages.forEach(imageUrl => {
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = 'Profissional';
+                    img.style.maxWidth = '100px';
+                    img.style.height = '100px';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    img.style.margin = '5px';
+                    document.getElementById('professionalImagesPreview').appendChild(img);
+                });
+            }
+
+            // Exibir imagens dos serviços
+            if (appData.serviceImages) {
+                appData.serviceImages.forEach(imageUrl => {
+                    const img = document.createElement('img');
+                    img.src = imageUrl;
+                    img.alt = 'Serviço';
+                    img.style.maxWidth = '100px';
+                    img.style.height = '100px';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    img.style.margin = '5px';
+                    document.getElementById('serviceImagesPreview').appendChild(img);
+                });
+            }
+
+            // Marcar os horários selecionados anteriormente
+            const savedHours = appData.hours || [];
+            Array.from(hoursContainer.children).forEach(button => {
+                if (savedHours.includes(button.textContent)) {
+                    button.classList.add('selected');
+                }
+            });
+
+            // Exibir agendamentos do dia
+            displayTodaysAppointments();
+
+            // Atualizar automaticamente os agendamentos a cada 10 segundos
+            setInterval(displayTodaysAppointments, 10000);
+        });
+
+        // Salvar configurações
+        document.getElementById('adminSettingsForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const companyName = document.getElementById('companyName').value;
+            const professionalsInput = document.getElementById('professionals').value;
+            const servicesInput = document.getElementById('services').value;
+
+            // Salvar horários selecionados
+            const selectedHours = Array.from(hoursContainer.children)
+                .filter(button => button.classList.contains('selected'))
+                .map(button => button.textContent);
+
+            // Salvar imagens dos profissionais
+            const professionalImages = Array.from(document.querySelectorAll('#professionalImagesPreview img')).map(img => img.src);
+
+            // Salvar imagens dos serviços
+            const serviceImages = Array.from(document.querySelectorAll('#serviceImagesPreview img')).map(img => img.src);
+
+            // Atualizar dados
+            appData.companyName = companyName;
+            appData.professionals = professionalsInput.split(',').map(p => p.trim());
+            appData.services = servicesInput.split(',').map(s => s.trim());
+            appData.hours = selectedHours;
+            appData.professionalImages = professionalImages;
+            appData.serviceImages = serviceImages;
+
+            saveAppData();
+            alert('Configurações salvas com sucesso!');
+        });
+
+        // Função para exibir agendamentos do dia
+        function displayTodaysAppointments() {
+            const today = new Date().toISOString().split('T')[0]; // Data de hoje no formato YYYY-MM-DD
+            const appointmentsTableBody = document.querySelector('#appointmentsTable tbody');
+            appointmentsTableBody.innerHTML = ''; // Limpar tabela
+
+            if (!appData.appointments) appData.appointments = []; // Inicializar array de agendamentos
+
+            const todaysAppointments = appData.appointments.filter(appointment => appointment.date === today);
+
+            if (todaysAppointments.length === 0) {
+                appointmentsTableBody.innerHTML = '<tr><td colspan="5">Nenhum agendamento para hoje.</td></tr>';
+                return;
+            }
+
+            todaysAppointments.forEach(appointment => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${appointment.name}</td>
+                    <td>${appointment.professional}</td>
+                    <td>${appointment.service}</td>
+                    <td>${appointment.date}</td>
+                    <td>${appointment.hour}</td>
+                `;
+                appointmentsTableBody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>

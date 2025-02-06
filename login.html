@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script src="data.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form label {
+            display: block;
+            margin-top: 15px;
+            color: #555;
+        }
+        form input, form button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        form button {
+            background: #25D366;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+        }
+        form button:hover {
+            background: #128C7E;
+        }
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="loginForm">
+            <label for="username">Usuário:</label>
+            <input type="text" id="username" placeholder="Digite seu usuário" required>
+
+            <label for="password">Senha:</label>
+            <input type="password" id="password" placeholder="Digite sua senha" required>
+
+            <button type="submit">Entrar</button>
+            <div class="error-message" id="errorMessage"></div>
+        </form>
+        <p style="text-align: center; margin-top: 15px;">
+            <a href="change-password.html">Alterar Senha</a>
+        </p>
+    </div>
+
+    <script>
+        window.addEventListener('load', function () {
+            loadAppData();
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+
+            const user = appData.users.find(u => u.username === username && u.password === password);
+
+            if (user) {
+                alert('Login realizado com sucesso!');
+                window.location.href = 'admin.html'; // Redireciona para o painel admin
+            } else {
+                errorMessage.textContent = 'Usuário ou senha inválidos.';
+            }
+        });
+    </script>
+</body>
+</html>

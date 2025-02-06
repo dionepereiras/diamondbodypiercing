@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Cliente</title>
+    <script src="data.js" defer></script>
+    <style>
+        /* Estilos idênticos ao index.html */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Painel Cliente</h1>
+        <div class="company-name" id="companyNameDisplay"></div>
+        <div class="logo-container" id="clientLogoContainer"></div>
+        <form id="appointmentForm">
+            <label for="professional">Selecione o profissional:</label>
+            <select id="professional" required></select>
+            <div class="image-preview" id="professionalImagePreview"></div>
+
+            <label for="service">Selecione o serviço:</label>
+            <select id="service" required></select>
+            <div class="image-preview" id="serviceImagePreview"></div>
+
+            <label for="date">Data do agendamento:</label>
+            <input type="date" id="date" required>
+
+            <label for="hour">Selecione o horário:</label>
+            <select id="hour" required></select>
+
+            <label for="name">Nome do cliente:</label>
+            <input type="text" id="name" placeholder="Digite o nome do cliente" required>
+
+            <button type="submit">Agendar via WhatsApp</button>
+        </form>
+    </div>
+
+    <script>
+        // Código idêntico ao index.html
+    </script>
+</body>
+</html>
